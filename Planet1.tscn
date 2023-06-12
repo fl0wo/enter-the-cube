@@ -1,4 +1,7 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Player.gd" type="Script" id=1]
+[ext_resource path="res://BorderCollisions.gd" type="Script" id=2]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Spatial
@@ -20,16 +23,19 @@ func _process(delta):
 
 
 func _input(ev):
-	if(ev is InputEventMouseButton):
+	if (ev is InputEventMouseButton and ev.is_pressed()):
 		# rotate_z(deg2rad(90)) # twin
 		var tween = get_node(\"Tween\")
 		
-		tween.interpolate_property(self, \"rotation_degrees\",rotation, Vector3(
+		tween.interpolate_property(self, \"rotation_degrees\", null, Vector3(
 			rotation.x,rotation.y,rotation.z + 90
-		), 1, Tween.TRANS_QUAD, Tween.EASE_IN_OUT)
+		), 2, Tween.TRANS_ELASTIC, Tween.EASE_OUT)
 		tween.start()
 		
 "
+
+[sub_resource type="BoxShape" id=2]
+extents = Vector3( 0.59045, 0.991702, 10 )
 
 [node name="Space" type="Spatial"]
 
@@ -37,14 +43,62 @@ func _input(ev):
 transform = Transform( 0.707107, -0.415627, 0.572061, 0, 0.809017, 0.587785, -0.707107, -0.415627, 0.572061, 0, 0, 0 )
 
 [node name="Camera" type="Camera" parent="Camera Origin"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 18.2846 )
-fov = 17.7
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 150 )
+projection = 1
+fov = 12.8
+size = 40.0
 near = 0.03
-far = 146.3
+far = 214.0
 
-[node name="Cube" type="Spatial" parent="."]
+[node name="World" type="Spatial" parent="."]
+transform = Transform( 0.995324, 0, 0, 0, 0.995324, 0, 0, 0, 0.995324, 0, 0, 0 )
 script = SubResource( 1 )
 
-[node name="Shape" type="CSGBox" parent="Cube"]
+[node name="Shape" type="CSGBox" parent="World"]
+width = 20.0
+height = 20.0
+depth = 20.0
 
-[node name="Tween" type="Tween" parent="Cube"]
+[node name="Tween" type="Tween" parent="World"]
+
+[node name="Player" type="Spatial" parent="World"]
+transform = Transform( 1.0047, 0, 0, 0, 1.0047, 0, 0, 0, 1.0047, 0, 10.5493, 0 )
+script = ExtResource( 1 )
+
+[node name="CSGBox" type="CSGBox" parent="World/Player"]
+transform = Transform( 1.0008, 0, 0, 0, 1.0008, 0, 0, 0, 1.0008, 0, 0, 0 )
+width = 1.0
+height = 1.0
+depth = 1.0
+
+[node name="Borders" type="Node" parent="."]
+
+[node name="Spatial" type="Spatial" parent="Borders"]
+
+[node name="StaticBody" type="StaticBody" parent="Borders/Spatial"]
+transform = Transform( 0.995324, 0, 0, 0, 0.995324, 0, 0, 0, 0.995324, 10.606, 10.6574, 0 )
+script = ExtResource( 2 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Borders/Spatial/StaticBody"]
+shape = SubResource( 2 )
+
+[node name="StaticBody3" type="StaticBody" parent="Borders/Spatial"]
+transform = Transform( 0.995324, 0, 0, 0, 0.995324, 0, 0, 0, 0.995324, -10.5543, 10.5956, 0 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Borders/Spatial/StaticBody3"]
+shape = SubResource( 2 )
+
+[node name="Spatial2" type="Spatial" parent="Borders"]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0 )
+
+[node name="StaticBody" type="StaticBody" parent="Borders/Spatial2"]
+transform = Transform( 0.995324, 0, 0, 0, 0.995324, 0, 0, 0, 0.995324, 10.606, 10.6574, 0 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Borders/Spatial2/StaticBody"]
+shape = SubResource( 2 )
+
+[node name="StaticBody3" type="StaticBody" parent="Borders/Spatial2"]
+transform = Transform( 0.995324, 0, 0, 0, 0.995324, 0, 0, 0, 0.995324, -10.5543, 10.5956, 0 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Borders/Spatial2/StaticBody3"]
+shape = SubResource( 2 )

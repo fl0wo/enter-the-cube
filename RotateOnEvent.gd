@@ -17,7 +17,7 @@ func _process(delta):
 	
 	
 func _input(ev):
-	if(ev is InputEventMouseButton):
+	if (ev is InputEventMouseButton):
 		# rotate_z(deg2rad(90)) # twin
 		var tween = get_node("Tween")
 	
