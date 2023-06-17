@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Player.gd" type="Script" id=1]
 
@@ -8,7 +8,7 @@ script/source = "extends Spatial
 onready var gen = preload(\"res://map/WorldModelGenerator.gd\")
 var map;
 var player;
-var direction;
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	map = gen.new();
@@ -16,6 +16,7 @@ func _ready():
 	player = get_child(0)
 	print('Ciao')
 	print(map.world_data)
+	update_player_position()
 
 
 func _input(ev):
@@ -25,19 +26,30 @@ func _input(ev):
 	#	print('Player moved:',player.translation)
 	if(ev is InputEventKey):
 		if Input.is_action_pressed(\"ui_right\"):
-			direction = Vector2(-1, 0)
+			map.move_player(\"right\")
+			
 		if Input.is_action_pressed(\"ui_left\"):
-			direction = Vector2(1, 0)
+			map.move_player(\"left\")
+			
 		if Input.is_action_pressed(\"ui_up\"):
-			direction = Vector2(0, -1)
+			map.move_player(\"up\")
+			
 		if Input.is_action_pressed(\"ui_down\"):
-			direction = Vector2(0, 1)
-		map.move_player(direction)
-		player.translation = map.get_player_world_position()
+			map.move_player(\"down\")
+
+		update_player_position()
 		print('Player moved:',player.translation)
-	direction = Vector2.ZERO
+
+func update_player_position():
+	player.translation = map.get_player_world_position()
 		
 "
+
+[sub_resource type="SpatialMaterial" id=2]
+flags_transparent = true
+albedo_color = Color( 1, 0, 0, 0.211765 )
+roughness = 0.18
+roughness_texture_channel = 1
 
 [node name="Space" type="Spatial"]
 
@@ -67,9 +79,10 @@ height = 1.0
 depth = 1.0
 
 [node name="Shape" type="CSGBox" parent="World"]
-visible = false
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 width = 20.0
 height = 20.0
 depth = 20.0
+material = SubResource( 2 )
 
 [node name="Tween" type="Tween" parent="World"]
