@@ -1,41 +1,43 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://Player.gd" type="Script" id=1]
-[ext_resource path="res://BorderCollisions.gd" type="Script" id=2]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Spatial
 
-
-# Declare member variables here. Examples:
-# var a = 2
-# var b = \"text\"
-
-
+onready var gen = preload(\"res://map/WorldModelGenerator.gd\")
+var map;
+var player;
+var direction;
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
+	map = gen.new();
+	map.initWorld();
+	player = get_child(0)
+	print('Ciao')
+	print(map.world_data)
 
 
 func _input(ev):
-	if (ev is InputEventMouseButton and ev.is_pressed()):
-		# rotate_z(deg2rad(90)) # twin
-		var tween = get_node(\"Tween\")
-		
-		tween.interpolate_property(self, \"rotation_degrees\", null, Vector3(
-			rotation.x,rotation.y,rotation.z + 90
-		), 2, Tween.TRANS_ELASTIC, Tween.EASE_OUT)
-		tween.start()
+	#if (ev is InputEventMouseButton and ev.is_pressed()):
+	#	map.move_player(Vector2(+1,0))
+	#	player.translation = map.get_player_world_position()
+	#	print('Player moved:',player.translation)
+	if(ev is InputEventKey):
+		if Input.is_action_pressed(\"ui_right\"):
+			direction = Vector2(-1, 0)
+		if Input.is_action_pressed(\"ui_left\"):
+			direction = Vector2(1, 0)
+		if Input.is_action_pressed(\"ui_up\"):
+			direction = Vector2(0, -1)
+		if Input.is_action_pressed(\"ui_down\"):
+			direction = Vector2(0, 1)
+		map.move_player(direction)
+		player.translation = map.get_player_world_position()
+		print('Player moved:',player.translation)
+	direction = Vector2.ZERO
 		
 "
-
-[sub_resource type="BoxShape" id=2]
-extents = Vector3( 0.59045, 0.991702, 10 )
 
 [node name="Space" type="Spatial"]
 
@@ -43,7 +45,7 @@ extents = Vector3( 0.59045, 0.991702, 10 )
 transform = Transform( 0.707107, -0.415627, 0.572061, 0, 0.809017, 0.587785, -0.707107, -0.415627, 0.572061, 0, 0, 0 )
 
 [node name="Camera" type="Camera" parent="Camera Origin"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 150 )
+transform = Transform( 1, 0, 0, 0, 1, -2.98023e-08, 0, 0, 1, -0.0325737, -0.103939, 150.075 )
 projection = 1
 fov = 12.8
 size = 40.0
@@ -53,13 +55,6 @@ far = 214.0
 [node name="World" type="Spatial" parent="."]
 transform = Transform( 0.995324, 0, 0, 0, 0.995324, 0, 0, 0, 0.995324, 0, 0, 0 )
 script = SubResource( 1 )
-
-[node name="Shape" type="CSGBox" parent="World"]
-width = 20.0
-height = 20.0
-depth = 20.0
-
-[node name="Tween" type="Tween" parent="World"]
 
 [node name="Player" type="Spatial" parent="World"]
 transform = Transform( 1.0047, 0, 0, 0, 1.0047, 0, 0, 0, 1.0047, 0, 10.5493, 0 )
@@ -71,34 +66,10 @@ width = 1.0
 height = 1.0
 depth = 1.0
 
-[node name="Borders" type="Node" parent="."]
+[node name="Shape" type="CSGBox" parent="World"]
+visible = false
+width = 20.0
+height = 20.0
+depth = 20.0
 
-[node name="Spatial" type="Spatial" parent="Borders"]
-
-[node name="StaticBody" type="StaticBody" parent="Borders/Spatial"]
-transform = Transform( 0.995324, 0, 0, 0, 0.995324, 0, 0, 0, 0.995324, 10.606, 10.6574, 0 )
-script = ExtResource( 2 )
-
-[node name="CollisionShape" type="CollisionShape" parent="Borders/Spatial/StaticBody"]
-shape = SubResource( 2 )
-
-[node name="StaticBody3" type="StaticBody" parent="Borders/Spatial"]
-transform = Transform( 0.995324, 0, 0, 0, 0.995324, 0, 0, 0, 0.995324, -10.5543, 10.5956, 0 )
-
-[node name="CollisionShape" type="CollisionShape" parent="Borders/Spatial/StaticBody3"]
-shape = SubResource( 2 )
-
-[node name="Spatial2" type="Spatial" parent="Borders"]
-transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0 )
-
-[node name="StaticBody" type="StaticBody" parent="Borders/Spatial2"]
-transform = Transform( 0.995324, 0, 0, 0, 0.995324, 0, 0, 0, 0.995324, 10.606, 10.6574, 0 )
-
-[node name="CollisionShape" type="CollisionShape" parent="Borders/Spatial2/StaticBody"]
-shape = SubResource( 2 )
-
-[node name="StaticBody3" type="StaticBody" parent="Borders/Spatial2"]
-transform = Transform( 0.995324, 0, 0, 0, 0.995324, 0, 0, 0, 0.995324, -10.5543, 10.5956, 0 )
-
-[node name="CollisionShape" type="CollisionShape" parent="Borders/Spatial2/StaticBody3"]
-shape = SubResource( 2 )
+[node name="Tween" type="Tween" parent="World"]
