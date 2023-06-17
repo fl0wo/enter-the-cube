@@ -1,5 +1,5 @@
 extends Node
-class_name WorldModelGenerator
+
 export(int) var WORLD_SIZE = 20
 const CELL_SIZE = 1
 

@@ -8,21 +8,15 @@
 
 config_version=4
 
-_global_script_classes=[ {
-"base": "Node",
-"class": "WorldModelGenerator",
-"language": "GDScript",
-"path": "res://map/WorldModelGenerator.gd"
-} ]
-_global_script_class_icons={
-"WorldModelGenerator": ""
-}
-
 [application]
 
 config/name="EnterTheCube"
 run/main_scene="res://Planet1.tscn"
 config/icon="res://icon.png"
+
+[autoload]
+
+WorldModelGenerator="*res://map/WorldModelGenerator.gd"
 
 [editor_plugins]
 

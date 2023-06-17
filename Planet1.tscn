@@ -1,21 +1,20 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Player.gd" type="Script" id=1]
+[ext_resource path="res://FollowPlayerRotation.gd" type="Script" id=2]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Spatial
 
-onready var gen = preload(\"res://map/WorldModelGenerator.gd\")
-var map;
+onready var map = get_node('/root/WorldModelGenerator')
 var player;
+var camera_origin;
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	map = gen.new();
 	map.initWorld();
-	player = get_child(0)
-	print('Ciao')
-	print(map.world_data)
+	player = get_child(0);
+	camera_origin = get_child(1);
 	update_player_position()
 
 
@@ -41,28 +40,19 @@ func _input(ev):
 		print('Player moved:',player.translation)
 
 func update_player_position():
+	var old_cube_face = map.get_player_world_face_index()
 	player.translation = map.get_player_world_position()
-		
+	var new_cube_face = map.get_player_world_face_index()
+	
+	#if(old_cube_face!=new_cube_face)
 "
 
 [sub_resource type="SpatialMaterial" id=2]
-flags_transparent = true
 albedo_color = Color( 1, 0, 0, 0.211765 )
 roughness = 0.18
 roughness_texture_channel = 1
 
 [node name="Space" type="Spatial"]
-
-[node name="Camera Origin" type="Spatial" parent="."]
-transform = Transform( 0.707107, -0.415627, 0.572061, 0, 0.809017, 0.587785, -0.707107, -0.415627, 0.572061, 0, 0, 0 )
-
-[node name="Camera" type="Camera" parent="Camera Origin"]
-transform = Transform( 1, 0, 0, 0, 1, -2.98023e-08, 0, 0, 1, -0.0325737, -0.103939, 150.075 )
-projection = 1
-fov = 12.8
-size = 40.0
-near = 0.03
-far = 214.0
 
 [node name="World" type="Spatial" parent="."]
 transform = Transform( 0.995324, 0, 0, 0, 0.995324, 0, 0, 0, 0.995324, 0, 0, 0 )
@@ -78,11 +68,23 @@ width = 1.0
 height = 1.0
 depth = 1.0
 
+[node name="Camera Origin" type="Spatial" parent="World"]
+transform = Transform( 0.710428, -0.417579, 0.574748, -0.0172458, -0.822714, -0.57642, 0.710219, 0.397725, -0.588914, 0, 0, 0 )
+script = ExtResource( 2 )
+
+[node name="Camera" type="Camera" parent="World/Camera Origin"]
+transform = Transform( 1, 0, 0, 0, 1, -2.98023e-08, 0, 0, 1, -0.0325737, -0.103939, 150.075 )
+projection = 1
+fov = 20.3
+size = 40.0
+near = 2.92
+far = 8192.0
+
 [node name="Shape" type="CSGBox" parent="World"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
-width = 20.0
-height = 20.0
-depth = 20.0
+width = 19.0
+height = 19.0
+depth = 19.0
 material = SubResource( 2 )
 
 [node name="Tween" type="Tween" parent="World"]
