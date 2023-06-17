@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Player.gd" type="Script" id=1]
 [ext_resource path="res://FollowPlayerRotation.gd" type="Script" id=2]
+[ext_resource path="res://skybox/Epic_BlueSunset_EquiRect_flat.png" type="Texture" id=3]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Spatial
@@ -40,12 +41,18 @@ func _input(ev):
 		print('Player moved:',player.translation)
 
 func update_player_position():
-	var old_cube_face = map.get_player_world_face_index()
 	player.translation = map.get_player_world_position()
-	var new_cube_face = map.get_player_world_face_index()
-	
-	#if(old_cube_face!=new_cube_face)
+
 "
+
+[sub_resource type="PanoramaSky" id=3]
+radiance_size = 3
+panorama = ExtResource( 3 )
+
+[sub_resource type="Environment" id=4]
+background_mode = 2
+background_sky = SubResource( 3 )
+background_sky_custom_fov = 94.4
 
 [sub_resource type="SpatialMaterial" id=2]
 albedo_color = Color( 1, 0, 0, 0.211765 )
@@ -69,11 +76,12 @@ height = 1.0
 depth = 1.0
 
 [node name="Camera Origin" type="Spatial" parent="World"]
-transform = Transform( 0.710428, -0.417579, 0.574748, -0.0172458, -0.822714, -0.57642, 0.710219, 0.397725, -0.588914, 0, 0, 0 )
+transform = Transform( 0.000583728, -0.824453, -0.574189, 0.710361, 0.406389, -0.582795, 0.710495, -0.405636, 0.583157, 0, 0, 0 )
 script = ExtResource( 2 )
 
 [node name="Camera" type="Camera" parent="World/Camera Origin"]
-transform = Transform( 1, 0, 0, 0, 1, -2.98023e-08, 0, 0, 1, -0.0325737, -0.103939, 150.075 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0325737, -0.103939, 150.075 )
+environment = SubResource( 4 )
 projection = 1
 fov = 20.3
 size = 40.0
@@ -81,7 +89,6 @@ near = 2.92
 far = 8192.0
 
 [node name="Shape" type="CSGBox" parent="World"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 width = 19.0
 height = 19.0
 depth = 19.0
