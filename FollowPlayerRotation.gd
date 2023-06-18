@@ -32,17 +32,17 @@ func _process(delta):
 		rad2deg(lerp_angle(
 			deg2rad(rotation_degrees.x),
 			deg2rad(target_rotation.x),
-			0.1
+			0.05
 		)),
 		rad2deg(lerp_angle(
 			deg2rad(rotation_degrees.y),
 			deg2rad(target_rotation.y),
-			0.1
+			0.05
 		)),
 		rad2deg(lerp_angle(
 			deg2rad(rotation_degrees.z),
 			deg2rad(target_rotation.z),
-			0.1
+			0.05
 		))
 	)
 

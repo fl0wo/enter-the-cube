@@ -18,9 +18,9 @@ func _ready():
 	map.initWorld();
 	
 	## Walls
-	#var wall_instances = map.initBlocksRandomly(wall_script.new())
-	#for w in wall_instances:
-		#get_tree().get_root().call_deferred('add_child',w);
+	var wall_instances = map.initBlocksRandomly(wall_script.new())
+	for w in wall_instances:
+		get_tree().get_root().call_deferred('add_child',w);
 		
 		
 	player = get_child(0);
@@ -81,9 +81,9 @@ script = ExtResource( 2 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0325737, -0.103939, 150.075 )
 environment = SubResource( 4 )
 projection = 1
-fov = 20.3
-size = 40.0
-near = 2.92
+fov = 11.7
+size = 35.0
+near = 3.12
 far = 8192.0
 
 [node name="Cube" type="CSGBox" parent="World"]
@@ -94,12 +94,14 @@ material = SubResource( 2 )
 
 [node name="One" type="Spatial" parent="World/Cube"]
 transform = Transform( 1.16135, 0, 0, 0, 1.16135, 0, 0, 0, 1.16135, 0, 0, 0 )
+visible = false
 
 [node name="CSGBox" type="CSGBox" parent="World/Cube/One"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -8.8953, 0 )
 
 [node name="Two" type="Spatial" parent="World/Cube"]
 transform = Transform( 1.16135, 0, 0, 0, -5.07641e-08, -1.16135, 0, 1.16135, -5.07641e-08, 0, 0, 0 )
+visible = false
 
 [node name="CSGBox2" type="CSGBox" parent="World/Cube/Two"]
 transform = Transform( 1, 0, 0, 0, 1, -3.19744e-14, 0, 3.19744e-14, 1, 0.860458, 8.94874, 3.71199e-07 )
@@ -109,6 +111,7 @@ transform = Transform( 1, 0, 0, 0, 1, -1.06581e-14, 0, 1.06581e-14, 1, -2.47412,
 
 [node name="Three" type="Spatial" parent="World/Cube"]
 transform = Transform( -0.0931992, 1.1576, -5.06003e-08, 0, -5.07641e-08, -1.16135, -1.1576, -0.0931992, 4.07386e-09, 0, 0, 0 )
+visible = false
 
 [node name="CSGBox2" type="CSGBox" parent="World/Cube/Three"]
 transform = Transform( 1, 7.45058e-09, -4.44089e-16, -1.49012e-08, 1, -3.747e-14, 4.44089e-16, 3.02813e-14, 1, -0.357937, 8.85065, 3.75487e-07 )
@@ -121,6 +124,7 @@ transform = Transform( 1, 0, -6.66134e-16, -1.49012e-08, 1, -1.23512e-14, 4.4408
 
 [node name="Four" type="Spatial" parent="World/Cube"]
 transform = Transform( -1.16019, 0.0518518, -2.26652e-09, 0, -5.07641e-08, -1.16135, -0.0518518, -1.16019, 5.07134e-08, 0, 0, 0 )
+visible = false
 
 [node name="CSGBox2" type="CSGBox" parent="World/Cube/Four"]
 transform = Transform( 1, 7.45058e-09, -8.88178e-16, 7.45058e-09, 1, -3.55271e-14, 0, 2.84217e-14, 1, 0.860459, 8.94875, 1.98815 )
@@ -136,6 +140,7 @@ transform = Transform( 1, 1.49012e-08, -1.11022e-15, 1.49012e-08, 1, -1.42109e-1
 
 [node name="Five" type="Spatial" parent="World/Cube"]
 transform = Transform( 0.0185863, -1.1612, 5.07576e-08, 0, -5.07641e-08, -1.16135, 1.1612, 0.0185863, -8.12434e-10, 0, 0, 0 )
+visible = false
 
 [node name="CSGBox2" type="CSGBox" parent="World/Cube/Five"]
 transform = Transform( 1, 7.45058e-09, -8.88178e-16, 7.45058e-09, 1, -3.55271e-14, 0, 2.84217e-14, 1, 0.860459, 8.94875, 1.98815 )
