@@ -105,13 +105,14 @@ func initWorld():
 func initBlocksRandomly(block):
 	var walls_instances = []
 	for i in range(6):
-		for j in range(WORLD_SIZE):
-			for k in range(WORLD_SIZE):
-				if(randi() % 20 == 0):
-					graph_data[i][j][k].block = block
-					walls_instances.append(
-						block.set_position(map_frc_into_xyz(Vector3(i,j,k)))
-					)
+		for j in range(WORLD_SIZE-2):
+			for k in range(WORLD_SIZE-2):
+				if(j>2 and k>2):
+					if(randi() % 20 == 0):
+						graph_data[i][j][k].block = block
+						walls_instances.append(
+							block.set_position(map_frc_into_xyz(Vector3(i,j,k)))
+						)
 	return walls_instances;
 func move_player() -> bool:
 	if(!player_last_direction):
@@ -140,7 +141,7 @@ func move_player() -> bool:
 
 func pick_direction(direction:String) -> bool:
 	print('Want to pick_direction')
-	if(!player_last_direction):
+	if(!player_last_direction or true):
 		player_last_direction = {
 			"face" : get_player_world_face_index(),
 			"direction":direction
@@ -221,46 +222,46 @@ func map_frc_into_xyz(frc:Vector3) -> Vector3:
 	var col = int(frc.z)
 	if(face == 0):
 		return Vector3(
-			row - WORLD_SIZE/2,
-			WORLD_SIZE / 2,
+			row - WORLD_SIZE/2 + CELL_SIZE,
+			WORLD_SIZE / 2 + CELL_SIZE,
 			-col + WORLD_SIZE/2 - CELL_SIZE
 		)
 		
 	if(face == 1):
 		return Vector3(
-			row - WORLD_SIZE/2,
-			- WORLD_SIZE / 2,
-			-col + WORLD_SIZE/2
+			row - WORLD_SIZE/2 + CELL_SIZE,
+			- WORLD_SIZE / 2 - CELL_SIZE,
+			-col + WORLD_SIZE/2 + CELL_SIZE
 		)
 		
 	if(face == 2):
 		return Vector3(
-			col - WORLD_SIZE/2, # colonna
-			-row + WORLD_SIZE/2 - CELL_SIZE, # riga
-			+WORLD_SIZE/2 # fissa
+			col - WORLD_SIZE/2 + CELL_SIZE, # colonna
+			-row + WORLD_SIZE/2 + CELL_SIZE, # riga
+			+WORLD_SIZE/2 + CELL_SIZE # fissa
 		)
 		
 	if(face == 4):
 		return Vector3(
-			col - WORLD_SIZE/2, # colonna
+			col - WORLD_SIZE/2 + CELL_SIZE, # colonna
 			-row + WORLD_SIZE/2 - CELL_SIZE, # riga
-			-WORLD_SIZE/2 # fissa
+			-WORLD_SIZE/2 - CELL_SIZE # fissa
 		)
 		
 		
 	if(face == 3):
 		return Vector3(
-			+WORLD_SIZE/2, # fissa
+			+WORLD_SIZE/2 + CELL_SIZE, # fissa
 			-row + WORLD_SIZE/2 - CELL_SIZE, # riga
-			-col + WORLD_SIZE/2 # colonna
+			-col + WORLD_SIZE/2 + CELL_SIZE # colonna
 		)
 		
 		
 	if(face == 5):
 		return Vector3(
-			-WORLD_SIZE/2, # fissa
-			-row + WORLD_SIZE/2 - CELL_SIZE, # riga
-			-col + WORLD_SIZE/2 # colonna
+			-WORLD_SIZE/2 - CELL_SIZE, # fissa
+			-row + WORLD_SIZE/2, # riga
+			-col + WORLD_SIZE/2 + CELL_SIZE/2 # colonna
 		)
 	return Vector3.ZERO
 
