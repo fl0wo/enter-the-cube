@@ -5,21 +5,11 @@ const CELL_SIZE = 1
 
 # Player position
 var player_position := Vector3()
+var player_faces_indexes := [0]
+#                          from face, to direction
+var player_last_direction;
 
 # Each cell tells what it contains 0 nothing 1 the player
-var world_data := []
-
-# Each cell contains 4 x Vector3(dx,dy,dz)
-#
-#       up : Vector3(dx,dy,dz)
-#		down: Vector3(dx,dy,dz)
-#       left: Vector3(dx,dy,dz)
-#       right: Vector3(dx,dy,dz)
-
-# Each one of those  vector3 tells you IN WHAT CELL you should move the player
-# if the player wants to go "up", "down", "left" or "right".
-# For the cells in the border of a face of a cube, should move you in the right face.
-
 var graph_data := []
 
 func initWorld():
@@ -43,10 +33,6 @@ func initWorld():
 					"left": left,
 					"right": right
 				}
-
-
-	# Update the edges of the cube
-
 
 	# Edge 1: Face 0-2
 	for i in range(WORLD_SIZE):
@@ -111,33 +97,106 @@ func initWorld():
 
 	# Set the initial player position
 	player_position = Vector3(
-		5,
+		0,
 		WORLD_SIZE / 2, 
 		WORLD_SIZE / 2
 	)
 
-
-func move_player(direction: String) -> bool:
+func initBlocksRandomly(block):
+	var walls_instances = []
+	for i in range(6):
+		for j in range(WORLD_SIZE):
+			for k in range(WORLD_SIZE):
+				if(randi() % 20 == 0):
+					graph_data[i][j][k].block = block
+					walls_instances.append(
+						block.set_position(map_frc_into_xyz(Vector3(i,j,k)))
+					)
+	return walls_instances;
+func move_player() -> bool:
+	if(!player_last_direction):
+		return false;
+		
 	print('Player model at',player_position)
 	
 	# Get the current cell of the player
 	var current_cell = graph_data[int(player_position.x)][int(player_position.y)][int(player_position.z)]
-
+	var prev_face = get_player_world_face_index()
 	# Check the direction and update the player's position
+	
+	var is_valid_direction = adjust_player_position(
+		current_cell,
+		player_last_direction.direction
+	)
+	
+	if(is_valid_direction):
+		var cur_face = get_player_world_face_index()
+		if(cur_face != prev_face):
+			player_faces_indexes.append(cur_face)
+	else:
+		player_last_direction = null
+		
+	return true
+
+func pick_direction(direction:String) -> bool:
+	print('Want to pick_direction')
+	if(!player_last_direction):
+		player_last_direction = {
+			"face" : get_player_world_face_index(),
+			"direction":direction
+		}
+		return true;
+	print(player_last_direction)
+	return false;
+
+func adjust_player_position(current_cell,direction):
+	var prev_face_index = get_player_world_face_index(1)
+	var face_index = get_player_world_face_index()
+	var hor = 1 if (prev_face_index > 1 or face_index > 1) else 0;
+	
+	print("Prev at",prev_face_index,"Now at",face_index)
+	
+	var translated_directions = [
+		[
+			{"up":"up","down":"down","left":"left","right":"right"}, # 0 vert v
+			{"up":"up","down":"down","left":"left","right":"right"}, # 0 hor clock-wise v
+		], 
+		[
+			{"up":"down","down":"up","left":"right","right":"left"}, # 1 vert v
+			{"up":"down","down":"up","left":"right","right":"left"}, # 1 hor clock-wise v
+		],
+		[
+			{"up":"left","down":"right","left":"down","right":"up"}, # 2 vert v
+			{"up":"left","down":"right","left":"down","right":"up"}, # 2 hor clock-wise
+		],
+		[
+			{"up":"up","down":"down","left":"left","right":"right"}, # 3 vert v
+			{"up":"left","down":"right","left":"up","right":"down"}, # 3 hor clock-wise v
+
+		],
+		[
+			{"up":"left","down":"right","left":"up","right":"down"}, # 4 vert v
+			{"up":"right","down":"left","left":"up","right":"down"}, # 4 hor clock-wise v
+			
+		],
+		[
+			{"up":"down","down":"up","left":"left","right":"right"}, # 5 vert v
+			{"up":"right","down":"left","left":"down","right":"up"}, # 5 hor clock-wise 
+		]
+	];
+	
 	if direction == "up":
-		player_position = current_cell["up"]
+		player_position = current_cell[translated_directions[face_index][hor]["up"]]
 	elif direction == "down":
-		player_position = current_cell["down"]
+		player_position = current_cell[translated_directions[face_index][hor]["down"]]
 	elif direction == "left":
-		player_position = current_cell["left"]
+		player_position = current_cell[translated_directions[face_index][hor]["left"]]
 	elif direction == "right":
-		player_position = current_cell["right"]
+		player_position = current_cell[translated_directions[face_index][hor]["right"]]
 	else:
 		# Invalid direction
 		return false
-
 	return true
-
 
 func is_position_valid(position: Vector3) -> bool:
 	return position.x >= 0 and \
@@ -154,6 +213,12 @@ func get_player_world_position() -> Vector3:
 	var col = int(player_position.z)
 	# Calculate the position of the player in the world (as x, y, z coordinates)
 	# The center of the world is in the origin 0,0,0
+	return map_frc_into_xyz(Vector3(face,row,col));
+
+func map_frc_into_xyz(frc:Vector3) -> Vector3:
+	var face = int(frc.x)
+	var row = int(frc.y)
+	var col = int(frc.z)
 	if(face == 0):
 		return Vector3(
 			row - WORLD_SIZE/2,
@@ -199,7 +264,13 @@ func get_player_world_position() -> Vector3:
 		)
 	return Vector3.ZERO
 
-# You can add more functions to modify the world data or perform other actions based on the player's position.
 
-func get_player_world_face_index() -> int:
-	return int(player_position.x)
+func get_player_world_face_index(prev:int=0) -> int:
+	if(prev==0):
+		return int(player_position.x);
+		
+	var id = player_faces_indexes.size()-(1+prev);
+	if(id >= 0 && id < player_faces_indexes.size()):
+		return player_faces_indexes[id]
+	else:
+		return 0;
