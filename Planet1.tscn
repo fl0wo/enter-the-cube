@@ -18,9 +18,9 @@ func _ready():
 	map.initWorld();
 	
 	## Walls
-	var wall_instances = map.initBlocksRandomly(wall_script.new())
-	for w in wall_instances:
-		get_tree().get_root().call_deferred('add_child',w);
+	#var wall_instances = map.initBlocksRandomly(wall_script.new())
+	#for w in wall_instances:
+		#get_tree().get_root().call_deferred('add_child',w);
 		
 		
 	player = get_child(0);

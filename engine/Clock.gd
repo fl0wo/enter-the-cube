@@ -2,7 +2,7 @@ extends Node
 
 onready var map = get_node('/root/WorldModelGenerator');
 
-export (int) var refresh_freq_ms = 150;
+export (int) var refresh_freq_ms = 50;
 var cur_passed_ms = 0;
 
 func _ready():

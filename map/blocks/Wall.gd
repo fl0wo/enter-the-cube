@@ -21,6 +21,8 @@ func can_continue_on_impact(entity):
 	return false;
 
 func set_position(pos:Vector3):
+	# TODO: create the instance only if not already created.
+	# Otherwise just change translation
 	var wall_instance = wall_scnn.instance()
 	wall_instance.translation = pos;
 	return wall_instance;

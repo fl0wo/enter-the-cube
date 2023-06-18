@@ -2,10 +2,11 @@ extends Node
 
 export(int) var WORLD_SIZE = 20
 const CELL_SIZE = 1
-
+export(int) var SPAWN_CUBE_FACE = 0;
 # Player position
 var player_position := Vector3()
-var player_faces_indexes := [0]
+var player_faces_indexes := [SPAWN_CUBE_FACE]
+var first_move := false
 #                          from face, to direction
 var player_last_direction;
 
@@ -97,7 +98,7 @@ func initWorld():
 
 	# Set the initial player position
 	player_position = Vector3(
-		0,
+		SPAWN_CUBE_FACE,
 		WORLD_SIZE / 2, 
 		WORLD_SIZE / 2
 	)
@@ -117,87 +118,137 @@ func initBlocksRandomly(block):
 func move_player() -> bool:
 	if(!player_last_direction):
 		return false;
-		
-	print('Player model at',player_position)
 	
 	# Get the current cell of the player
 	var current_cell = graph_data[int(player_position.x)][int(player_position.y)][int(player_position.z)]
 	var prev_face = get_player_world_face_index()
 	# Check the direction and update the player's position
 	
-	var is_valid_direction = adjust_player_position(
+	var translated_direction = adjust_player_position(
 		current_cell,
 		player_last_direction.direction
 	)
 	
-	if(is_valid_direction):
+	if(translated_direction):
 		var cur_face = get_player_world_face_index()
 		if(cur_face != prev_face):
-			player_faces_indexes.append(cur_face)
+			player_faces_indexes.append(cur_face);
+			first_move = false
+			player_last_direction.direction = translated_direction
 	else:
 		player_last_direction = null
-		
 	return true
 
 func pick_direction(direction:String) -> bool:
-	print('Want to pick_direction')
 	if(!player_last_direction or true):
 		player_last_direction = {
 			"face" : get_player_world_face_index(),
-			"direction":direction
+			"direction": direction # maybe instead we should calculate the translated direction
 		}
+		first_move = true
 		return true;
 	print(player_last_direction)
 	return false;
 
 func adjust_player_position(current_cell,direction):
-	var prev_face_index = get_player_world_face_index(1)
-	var face_index = get_player_world_face_index()
-	var hor = 1 if (prev_face_index > 1 or face_index > 1) else 0;
-	
-	print("Prev at",prev_face_index,"Now at",face_index)
-	
-	var translated_directions = [
-		[
-			{"up":"up","down":"down","left":"left","right":"right"}, # 0 vert v
-			{"up":"up","down":"down","left":"left","right":"right"}, # 0 hor clock-wise v
-		], 
-		[
-			{"up":"down","down":"up","left":"right","right":"left"}, # 1 vert v
-			{"up":"down","down":"up","left":"right","right":"left"}, # 1 hor clock-wise v
-		],
-		[
-			{"up":"left","down":"right","left":"down","right":"up"}, # 2 vert v
-			{"up":"left","down":"right","left":"down","right":"up"}, # 2 hor clock-wise
-		],
-		[
-			{"up":"up","down":"down","left":"left","right":"right"}, # 3 vert v
-			{"up":"left","down":"right","left":"up","right":"down"}, # 3 hor clock-wise v
+	if(!player_last_direction):
+		return false;
 
+	var translated_direction = translate_direction(
+		direction
+	)
+	
+	var desired_position = current_cell[translated_direction]
+	var desired_cell = graph_data[desired_position.x][desired_position.y][desired_position.z]
+	
+	if("block" in desired_cell and desired_cell.block and desired_cell.block.has_method('can_continue_on_impact')):
+		if(desired_cell.block.can_continue_on_impact(self)):
+			player_position = desired_position
+		else:
+			player_last_direction = null
+			first_move = false
+			return false
+	else:
+		player_position = desired_position
+	
+	return translated_direction
+
+const translated_directions = [
+		[
+			# Face Number 0
+			{"up":"up","down":"down","left":"left","right":"right"}, # from 0
+			"teleport", # from 1
+			"right", # from 2
+			"up", # from 3
+			"left", # from 4
+			"down" # from 5
 		],
 		[
-			{"up":"left","down":"right","left":"up","right":"down"}, # 4 vert v
-			{"up":"right","down":"left","left":"up","right":"down"}, # 4 hor clock-wise v
-			
+			# Face Number 1
+			"teleport", # from 0
+			{"up":"up","down":"down","left":"right","right":"left"}, # from 1
+			"right", # from 2
+			"up", # from 3
+			"left", # from 4
+			"down" # from 5
 		],
 		[
-			{"up":"down","down":"up","left":"left","right":"right"}, # 5 vert v
-			{"up":"right","down":"left","left":"down","right":"up"}, # 5 hor clock-wise 
+			# Face Number 2
+			"down", # from 0
+			"up", # from 1
+			{"up":"left","down":"right","left":"down","right":"up"}, # from 2
+			"left", # from 3
+			"teleport", # from 4
+			"right" # from 5
+		],
+		[
+			# Face Number 3
+			"down", # from 0
+			"up", # from 1
+			"right", # from 2
+			{"up":"up","down":"down","left":"left","right":"right"}, # from 3
+			"left", # from 4
+			"teleport" # from 5
+		],
+		[
+			# Face Number 4
+			"down",# from 0
+			"up", # from 1
+			"teleport", # from 2
+			"left", # from 3
+			{"up":"left","down":"right","left":"up","right":"down"}, # from 4
+			"right" # from 5
+		],
+		[
+			# Face Number 5
+			"down", # from 0 
+			"up", # from 1 
+			"right", # from 2 
+			"teleport", # from 3
+			"left", # from 4
+			{"up":"down","down":"up","left":"left","right":"right"} # from 5
 		]
 	];
+
+func translate_direction(direction):
+
+	var face_index = get_player_world_face_index()
+	var prev_face_index = get_player_world_face_index(1)
 	
-	if direction == "up":
-		player_position = current_cell[translated_directions[face_index][hor]["up"]]
-	elif direction == "down":
-		player_position = current_cell[translated_directions[face_index][hor]["down"]]
-	elif direction == "left":
-		player_position = current_cell[translated_directions[face_index][hor]["left"]]
-	elif direction == "right":
-		player_position = current_cell[translated_directions[face_index][hor]["right"]]
-	else:
-		# Invalid direction
-		return false
-	return true
+	if(first_move): return translated_directions \
+		[face_index] \
+		[face_index] \
+		[direction]
+	
+	var translated_direction_info = translated_directions \
+		[face_index] \
+		[prev_face_index]
+	
+	if(prev_face_index!=face_index):
+		return translated_direction_info
+
+	return translated_direction_info[direction]
+
 
 func is_position_valid(position: Vector3) -> bool:
 	return position.x >= 0 and \
@@ -224,27 +275,27 @@ func map_frc_into_xyz(frc:Vector3) -> Vector3:
 		return Vector3(
 			row - WORLD_SIZE/2 + CELL_SIZE,
 			WORLD_SIZE / 2 + CELL_SIZE,
-			-col + WORLD_SIZE/2 - CELL_SIZE
+			-col + WORLD_SIZE/2
 		)
 		
 	if(face == 1):
 		return Vector3(
 			row - WORLD_SIZE/2 + CELL_SIZE,
 			- WORLD_SIZE / 2 - CELL_SIZE,
-			-col + WORLD_SIZE/2 + CELL_SIZE
+			-col + WORLD_SIZE/2 - CELL_SIZE
 		)
 		
 	if(face == 2):
 		return Vector3(
 			col - WORLD_SIZE/2 + CELL_SIZE, # colonna
-			-row + WORLD_SIZE/2 + CELL_SIZE, # riga
+			-row + WORLD_SIZE/2 - CELL_SIZE, # riga
 			+WORLD_SIZE/2 + CELL_SIZE # fissa
 		)
 		
 	if(face == 4):
 		return Vector3(
 			col - WORLD_SIZE/2 + CELL_SIZE, # colonna
-			-row + WORLD_SIZE/2 - CELL_SIZE, # riga
+			-row + WORLD_SIZE/2, # riga
 			-WORLD_SIZE/2 - CELL_SIZE # fissa
 		)
 		
@@ -274,4 +325,4 @@ func get_player_world_face_index(prev:int=0) -> int:
 	if(id >= 0 && id < player_faces_indexes.size()):
 		return player_faces_indexes[id]
 	else:
-		return 0;
+		return get_player_world_face_index()
