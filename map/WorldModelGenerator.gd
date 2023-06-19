@@ -1,6 +1,7 @@
 extends Node
 
-export(int) var WORLD_SIZE = 20
+export(int) var WORLD_SIZE = 10
+var MULT_FACTOR = 20/WORLD_SIZE
 const CELL_SIZE = 1
 export(int) var SPAWN_CUBE_FACE = 0;
 # Player position
@@ -102,19 +103,8 @@ func initWorld():
 		WORLD_SIZE / 2, 
 		WORLD_SIZE / 2
 	)
-
-func initBlocksRandomly(block):
-	var walls_instances = []
-	for i in range(6):
-		for j in range(WORLD_SIZE-2):
-			for k in range(WORLD_SIZE-2):
-				if(j>2 and k>2):
-					if(randi() % 20 == 0):
-						graph_data[i][j][k].block = block
-						walls_instances.append(
-							block.set_position(map_frc_into_xyz(Vector3(i,j,k)))
-						)
-	return walls_instances;
+	
+	
 func move_player() -> bool:
 	if(!player_last_direction):
 		return false;
@@ -154,11 +144,18 @@ func adjust_player_position(current_cell,direction):
 	if(!player_last_direction):
 		return false;
 
+	var face_index = get_player_world_face_index()
+	var prev_face_index = get_player_world_face_index(1)
+
 	var translated_direction = translate_direction(
-		direction
+		first_move,
+		direction,
+		face_index,
+		prev_face_index
 	)
 	
 	var desired_position = current_cell[translated_direction]
+
 	var desired_cell = graph_data[desired_position.x][desired_position.y][desired_position.z]
 	
 	if("block" in desired_cell and desired_cell.block and desired_cell.block.has_method('can_continue_on_impact')):
@@ -236,20 +233,16 @@ const translated_directions = [
 		]
 	];
 
-func translate_direction(direction):
-
-	var face_index = get_player_world_face_index()
-	var prev_face_index = get_player_world_face_index(1)
-	
+func translate_direction(first_move,direction,face_index,prev_face_index):
 	if(first_move): return translated_directions \
 		[face_index] \
 		[face_index] \
 		[direction]
-	
+
 	var translated_direction_info = translated_directions \
 		[face_index] \
 		[prev_face_index]
-	
+
 	if(prev_face_index!=face_index):
 		return translated_direction_info
 
@@ -323,6 +316,31 @@ func map_frc_into_xyz(frc:Vector3) -> Vector3:
 	return Vector3.ZERO
 
 
+func shift_position(
+		position:Vector3,
+		direction:String,
+		distance:int) -> Vector3:
+			
+	var face_index = position.x
+	var prev_face_index = position.x
+	var current_position = cell_of(position)
+	var actual_pos;
+	
+	for i in range(distance):
+		var translated_direction = translate_direction(
+			i==0,
+			direction,
+			face_index,
+			prev_face_index
+		)
+		actual_pos = current_position[translated_direction]
+		current_position = cell_of(actual_pos)
+		if (actual_pos.x != face_index):
+			prev_face_index = face_index
+			face_index = actual_pos.x
+			
+	return actual_pos;
+
 func get_player_world_face_index(prev:int=0) -> int:
 	if(prev==0):
 		return int(player_position.x);
@@ -332,3 +350,13 @@ func get_player_world_face_index(prev:int=0) -> int:
 		return player_faces_indexes[id]
 	else:
 		return get_player_world_face_index()
+
+func get_player_model_position():
+	return player_position
+
+func set_player_position(pos:Vector3):
+	player_position = pos;
+	player_faces_indexes[player_faces_indexes.size()-1] = pos.x;
+
+func cell_of(position:Vector3):
+	return graph_data[int(position.x)][int(position.y)][int(position.z)]

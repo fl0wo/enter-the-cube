@@ -10,11 +10,17 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Spatial",
+"class": "End",
+"language": "GDScript",
+"path": "res://map/blocks/End.gd"
+}, {
+"base": "Spatial",
 "class": "Wall",
 "language": "GDScript",
 "path": "res://map/blocks/Wall.gd"
 } ]
 _global_script_class_icons={
+"End": "",
 "Wall": ""
 }
 
@@ -27,6 +33,7 @@ config/icon="res://icon.png"
 [autoload]
 
 WorldModelGenerator="*res://map/WorldModelGenerator.gd"
+LevelGenerator="*res://map/levels/LevelGenerator.gd"
 
 [display]
 
