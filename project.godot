@@ -28,6 +28,16 @@ config/icon="res://icon.png"
 
 WorldModelGenerator="*res://map/WorldModelGenerator.gd"
 
+[display]
+
+window/size/width=540
+window/size/height=960
+window/size/resizable=false
+window/size/test_width=540
+window/size/test_height=960
+window/stretch/mode="viewport"
+window/stretch/aspect="keep"
+
 [editor_plugins]
 
 enabled=PoolStringArray(  )

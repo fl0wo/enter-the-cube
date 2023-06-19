@@ -176,7 +176,13 @@ func adjust_player_position(current_cell,direction):
 const translated_directions = [
 		[
 			# Face Number 0
-			{"up":"up","down":"down","left":"left","right":"right"}, # from 0
+			# from 0
+			{
+				"up":"up",
+				"down":"down",
+				"left":"left",
+				"right":"right"
+			},
 			"teleport", # from 1
 			"right", # from 2
 			"up", # from 3
